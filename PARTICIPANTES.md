@@ -57,4 +57,5 @@ mucho más que «aprender GEE».
 
 **15.**
 
-**16.**
+**16.** Carmen Jiménez Carrasco · [@carmenjc-cloud](https://github.com/carmenjc-cloud) · Caracterización de habitat
+
