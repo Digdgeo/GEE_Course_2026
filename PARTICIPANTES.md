@@ -29,7 +29,7 @@ mucho más que «aprender GEE».
 **01.** 
 **01.** Patricia Tena Romero. [@patriciatenaromero-eng!](https://github.com/patriciatenaromero-eng) Aprender todo lo que pueda
 
-**02.**
+**02.** Pilar Lafita Narbona · [@pilarlafita](https://github.com/pilarlafita) · Aprender a trabajar con la interfaz de GEE e identificar herramientas para analizar cambios de usos del suelo espacial y temporalmente
 
 **03.**
 
