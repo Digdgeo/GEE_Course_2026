@@ -39,23 +39,23 @@ mucho más que «aprender GEE».
 
 **06.**
 
-**07.**
+**07.** Gabriel Padilla Rebollo · [@gabipr96](https://github.com/gabipr96) · Entender todas las aplicaciones posibles de GEE e intentar aplicarlas en futuros proyectos.
 
 **08.** Miguel Sevilla Callejo `@msevilla00` en redes, en [GitHub](https://github.com/msevilla00) y en [GitLab](https://gitlab.com/msevilla00) - Tenér mas soltura con GEE y aprovechar por ejemplo [Google Satellite Embedding](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_SATELLITE_EMBEDDING_V1_ANNUAL?hl=es-419#description)
 
-**09.**
+**09.** Héctor Miranda Cebrián · [@hmirceb](https://github.com/hmirceb) · Tratamiento de series temporales de cambio de uso de suelo y fenología vegetal
 
 **10.**
 
 **11.**
 
-**12.**
+**12.** Gabriela Romero · [@gabrielapromero](https://github.com/gabrielapromero) · Análisis de series temporales con Landsat y Sentinel2, y generar una app en GEE para hacer seguimiento de inundaciones
 
 **13.**
 
 **14.**
 
-**15.**
+**15.** Ángela Mosquera Giménez · [@angelamosquera](https://github.com/angelamosquera) · Familiarizarme con la herramienta GEE y ver cómo puedo aplicarla a mi área trabajo en oceanografía física
 
 **16.** Carmen Jiménez Carrasco · [@carmenjc-cloud](https://github.com/carmenjc-cloud) · Caracterización de habitat
 
