@@ -34,7 +34,7 @@ mucho más que «aprender GEE».
 
 **04.**
 
-**05.**
+**05.** Hajar Oukabli · [@ha-oukabli](https://github.com/ha-oukabli) · Aprender nuevas herramientas y mejorar mis habilidades con Google Earth Engine para aplicarlas en mi trabajo.
 
 **06.**
 
