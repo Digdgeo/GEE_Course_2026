@@ -64,7 +64,21 @@ print('Nubes declaradas (%):', cruda.get('CLOUDY_PIXEL_PERCENTAGE'));
 // escalarlos. CUIDADO: una operación aritmética devuelve una imagen NUEVA y se
 // deja las propiedades por el camino, la fecha incluida. Si las necesitas
 // después, hay que copiarlas a mano. Es un tropiezo clásico.
-var unaImagen = cruda.divide(10000).copyProperties(cruda, ['system:time_start']);
+//
+// Y ahí viene el segundo tropiezo, que va pegado al primero: **`copyProperties`
+// no devuelve un `ee.Image`, devuelve un `ee.Element`**, que es el tipo padre
+// del que cuelgan imágenes, *features* y colecciones. Un Element no sabe hacer
+// `clip` ni `normalizedDifference`, así que la línea siguiente fallaría con:
+//
+//     unaImagen.clip is not a function. Earth Engine requires you to specify
+//     the object type before calling 'clip'.
+//
+// Por eso se envuelve en `ee.Image(...)`. No convierte nada: solo le dice al
+// cliente de JavaScript de qué tipo es el objeto que ya tenía, para que le deje
+// llamar a los métodos de imagen. Lo mismo pasa con `coleccion.first()`, que
+// también devuelve un Element.
+var unaImagen = ee.Image(
+  cruda.divide(10000).copyProperties(cruda, ['system:time_start']));
 
 Map.addLayer(unaImagen.clip(zona), visColor, '1. Color natural, agosto 2024');
 
