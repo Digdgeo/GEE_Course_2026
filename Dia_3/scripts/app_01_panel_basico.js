@@ -104,20 +104,36 @@ var fecha = ee.Date(FECHA);
  * —29SQA, 29SQB, 30STF y 30STG—, y la mayoría de las fechas del ciclo traen
  * los cuatro gránulos. Sin `.mosaic()` estarías midiendo una esquina.
  *
- * Y hay un detalle que conviene conocer antes de que muerda: esos cuatro tiles
- * **no están en la misma proyección**. Los 29S van en EPSG:32629 (UTM 29N) y
- * los 30S en EPSG:32630 (UTM 30N), porque Doñana está justo en el límite de
- * los dos husos. Cuando mezclas imágenes con proyecciones distintas, Earth
- * Engine no puede elegir una y la proyección por defecto del resultado se va a
- * **EPSG:4326 con píxeles de 111 km**. Compruébalo:
+ * ¿Y por qué cuatro, si el parque entero está entre 6,56° W y 6,25° W, o sea
+ * al oeste del meridiano de 6° W que separa los husos UTM 29 y 30? Porque los
+ * tiles de Sentinel-2 se solapan y los del huso 30 se estiran hacia el oeste
+ * más allá de su zona. Los 29S van en EPSG:32629 y los 30S en EPSG:32630.
  *
- *     print(indice.projection());   // EPSG:4326, nominalScale 111319 m
+ * **Se pueden pedir solo los dos del huso 29, y casi no se pierde nada:**
  *
- * No afecta a lo que hacemos aquí, porque en `reduceRegion` y en `Map` se pasa
- * la escala explícitamente y eso manda. Pero si algún día exportas esto sin
- * decir `crs` y `scale`, o llamas a `reproject()` confiando en la proyección
- * «natural» de la imagen, te llevarás un disgusto. **Con datos a caballo de
- * dos husos, la escala y el CRS se dicen siempre a mano.**
+ *     .filter(ee.Filter.inList('MGRS_TILE', ['29SQA', '29SQB']))
+ *
+ * Medido sobre el 14-feb-2026: con los cuatro, 27.557 ha y 99,63 % del parque
+ * observado; con dos, 27.561 ha y 99,62 %. Cuatro hectáreas de diferencia
+ * sobre 27.557, y la mitad de datos que mover. El matiz está en las fechas
+ * nubladas, donde el solape sí aporta: el 5-ene-2026 pasa de 82,4 % a 80,7 %
+ * de parque observado. Decidir si compensa es parte del trabajo.
+ *
+ * LO QUE NO ARREGLA ESE FILTRO, y conviene no confundirlo: la proyección.
+ * `print(indice.projection())` dice **EPSG:4326 con píxeles de 111 km**, y
+ * sigue diciéndolo aunque dejes un solo tile. No es por mezclar husos: es que
+ * en Earth Engine **cualquier composición —`mosaic()`, `median()`, incluso un
+ * `mosaic()` de una sola imagen— devuelve la proyección por defecto**, porque
+ * una composición no tiene una malla propia que heredar. Compruébalo:
+ *
+ *     print(ee.Image(s2.first()).projection());   // EPSG:32629, 10 m
+ *     print(s2.mosaic().projection());            // EPSG:4326, 111 km
+ *
+ * No afecta a lo que hacemos aquí, porque en `reduceRegion` y en `Map` la
+ * escala se pasa explícitamente y eso manda. Pero si exportas sin decir `crs`
+ * y `scale`, o llamas a `reproject()` confiando en la proyección «natural» de
+ * la imagen, te llevarás un disgusto. **Después de una composición, la escala
+ * y el CRS se dicen siempre a mano.**
  */
 var indice = s2
   .filterDate(fecha, fecha.advance(1, 'day'))
