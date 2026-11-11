@@ -36,6 +36,15 @@
 // nombre ni de idioma. Si algún día esta línea devuelve 0 elementos es que
 // WDPA ha cambiado el esquema de la tabla: entonces, o se busca el campo nuevo
 // (`print(parque.first())` lo enseña) o se usa la caja del final del script.
+//
+// Y NO ES UN CAPRICHO FILTRAR POR ID EN VEZ DE POR NOMBRE. En WDPA hay **diez**
+// registros cuyo nombre contiene «Doñana», y son sitios distintos con límites
+// distintos: el Parque Natural (SITE_ID 349268, 681 km²), el humedal Ramsar
+// (68175, 1.131 km²), la ZEC y la ZEPA (1.281 km² cada una), el sitio del
+// Patrimonio Mundial (61611)… Filtrar por `NAME` devolvería los diez y el
+// `.geometry()` sería la unión de todos. El 389012 es **el Parque Nacional**:
+// categoría II de la UICN, declarado en 1969, 533,47 km² según el propio WDPA,
+// que es lo que cuadra con las 53.327 ha que mide la geometría.
 var parque = ee.FeatureCollection('WCMC/WDPA/current/polygons')
   .filter(ee.Filter.eq('SITE_ID', 389012));
 
@@ -88,6 +97,28 @@ var fecha = ee.Date(FECHA);
 
 // Varias escenas del mismo día: la marisma cae en dos pasadas de Sentinel-2,
 // así que hay que mosaicarlas o se mide media marisma.
+/*
+ * EL `.mosaic()` NO ES DECORATIVO, Y AQUÍ JUNTA CUATRO IMÁGENES.
+ *
+ * Doñana no cae dentro de un solo tile de Sentinel-2: la cruzan **cuatro**
+ * —29SQA, 29SQB, 30STF y 30STG—, y la mayoría de las fechas del ciclo traen
+ * los cuatro gránulos. Sin `.mosaic()` estarías midiendo una esquina.
+ *
+ * Y hay un detalle que conviene conocer antes de que muerda: esos cuatro tiles
+ * **no están en la misma proyección**. Los 29S van en EPSG:32629 (UTM 29N) y
+ * los 30S en EPSG:32630 (UTM 30N), porque Doñana está justo en el límite de
+ * los dos husos. Cuando mezclas imágenes con proyecciones distintas, Earth
+ * Engine no puede elegir una y la proyección por defecto del resultado se va a
+ * **EPSG:4326 con píxeles de 111 km**. Compruébalo:
+ *
+ *     print(indice.projection());   // EPSG:4326, nominalScale 111319 m
+ *
+ * No afecta a lo que hacemos aquí, porque en `reduceRegion` y en `Map` se pasa
+ * la escala explícitamente y eso manda. Pero si algún día exportas esto sin
+ * decir `crs` y `scale`, o llamas a `reproject()` confiando en la proyección
+ * «natural» de la imagen, te llevarás un disgusto. **Con datos a caballo de
+ * dos husos, la escala y el CRS se dicen siempre a mano.**
+ */
 var indice = s2
   .filterDate(fecha, fecha.advance(1, 'day'))
   .map(mndwi)
@@ -232,7 +263,7 @@ panel.add(resultado);
  *
  * Si sale eso, la cadena entera está bien: el contorno, el mosaico del día, la
  * máscara de nubes, el índice y el reductor. Si sale la mitad, probablemente se
- * ha perdido el `.mosaic()` y estás midiendo una sola pasada.
+ * ha perdido el `.mosaic()` y estás midiendo uno de los cuatro tiles.
  */
 
 // ===========================================================================
