@@ -30,8 +30,8 @@ var AREA_PARQUE_HA = 53327;
 
 // El ciclo hidrológico, de octubre a octubre, que es como se mide la marisma:
 // el año natural partiría la inundación en dos.
-var INICIO = '2017-10-01';
-var FIN    = '2018-10-01';
+var INICIO = '2025-10-01';
+var FIN    = '2026-10-01';
 
 // Cobertura mínima para dar un número por bueno. Ver §6.
 var MINIMO_VISTO = 90;
@@ -268,7 +268,7 @@ fechas.evaluate(function (lista) {
   // Se arranca con una fecha que se sabe buena, no con la primera de la lista:
   // la primera es de octubre y la marisma está seca, así que la aplicación
   // abriría con un mapa en blanco y pareciendo que no funciona.
-  var arranque = lista.indexOf('2018-03-28') >= 0 ? '2018-03-28' : lista[0];
+  var arranque = lista.indexOf('2026-02-14') >= 0 ? '2026-02-14' : lista[0];
   selector.setValue(arranque);   // dispara onChange y pinta
 });
 
@@ -277,15 +277,17 @@ fechas.evaluate(function (lista) {
 // ===========================================================================
 
 /*
- * Pon el selector en **2018-03-13** y luego en **2018-03-28**:
+ * Pon el selector en **2026-01-05** y luego en **2026-02-14**:
  *
- *   2018-03-13   11.667 ha   ·  parque observado  84 %
- *   2018-03-28   19.313 ha   ·  parque observado  99 %
+ *   2026-01-05    7.973 ha   ·  parque observado  83 %
+ *   2026-02-14   27.557 ha   ·  parque observado 100 %
  *
- * Quince días y 7.600 ha. Parece una crecida. No lo es: el día 13 hay nubes
- * sobre un 16 % del parque, y bajo una nube el píxel no dice «seco», dice
- * «no lo sé». Al enmascararlo sale del cálculo, y la suma de agua se queda
- * corta en todo lo que había debajo.
+ * Seis semanas y 19.600 ha. Buena parte es crecida de verdad —el ciclo se
+ * llenó de enero a febrero—, pero no toda: el día 5 de enero hay nubes sobre
+ * un 17 % del parque, y bajo una nube el píxel no dice «seco», dice «no lo
+ * sé». Al enmascararlo sale del cálculo, y la suma de agua se queda corta en
+ * todo lo que hubiera debajo. Sin el segundo número no hay forma de saber qué
+ * parte del salto es agua y qué parte es cielo despejado.
  *
  * Por eso la aplicación muestra **dos** números y avisa por debajo del 90 %.
  * Un visor que solo publica la superficie inundada está invitando a su usuario
@@ -298,8 +300,8 @@ fechas.evaluate(function (lista) {
  * donde más duele. Y la trampa es silenciosa: el número sale, es verosímil y
  * nadie se queja.
  *
- * Pruébalo también con **2018-02-01** (18 % observado, 296 ha): la aplicación
- * lo da en rojo, y así tiene que ser.
+ * Pruébalo también con **2025-12-26** (25 % observado, 2.084 ha): la
+ * aplicación lo da en rojo, y así tiene que ser.
  */
 
 // ===========================================================================
@@ -307,7 +309,7 @@ fechas.evaluate(function (lista) {
 // ===========================================================================
 
 /*
- * 1. El selector ofrece las 68 fechas del ciclo, y en un tercio de ellas la
+ * 1. El selector ofrece las 103 fechas del ciclo, y en casi un tercio de ellas la
  *    cobertura es ridícula. Fíltralas: queda en que el `ui.Select` solo
  *    muestre las fechas con más del 90 % del parque observado.
  *
@@ -319,8 +321,8 @@ fechas.evaluate(function (lista) {
  *
  * 2. Cambia INICIO y FIN a '2023-10-01' y '2024-10-01', el ciclo de la sequía,
  *    y vuelve a mirar el máximo: 3.343 ha el 20 de febrero, frente a las
- *    19.313 de marzo de 2018. La misma aplicación, el mismo código, otra
- *    marisma.
+ *    27.557 del 14 de febrero de 2026. La misma aplicación, el mismo código,
+ *    otra marisma.
  *
  * 3. Añade un `ui.Checkbox` que encienda y apague la lámina de agua, sin
  *    recalcularla: `Map.layers().get(CAPA_AGUA).setShown()`. Eso es gratis;

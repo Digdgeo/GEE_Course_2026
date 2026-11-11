@@ -49,7 +49,7 @@ var ROI = parque.geometry();
 var AREA_PARQUE_HA = 53327;
 
 // La fecha de hoy es fija. En el script 2 la elige el usuario.
-var FECHA = '2018-03-28';
+var FECHA = '2026-02-14';
 
 /*
  * Sentinel-2 L2A. Dos decisiones que ya salieron en el día 2 y que aquí se
@@ -191,7 +191,7 @@ function medirArea() {
       reducer: ee.Reducer.sum(),
       geometry: ROI,
       // 30 m, no 10 m. A 10 m son 5,3 millones de píxeles y a 30 m son 590.000.
-      // Medido sobre esta misma fecha: 19.312 ha a 10 m y 19.313 ha a 30 m
+      // Medido sobre esta misma fecha: 19.312 ha a 10 m y 27.557 ha a 30 m
       // —una diferencia del 0,005 %— y menos de la mitad de espera. En una
       // interfaz, eso decide si la usa alguien.
       scale: 30,
@@ -228,7 +228,7 @@ panel.add(resultado);
 /*
  * CONTROL — con el script tal cual, el botón tiene que dar:
  *
- *   19.313 ha · 36,2 % del parque
+ *   27.557 ha · 51,7 % del parque
  *
  * Si sale eso, la cadena entera está bien: el contorno, el mosaico del día, la
  * máscara de nubes, el índice y el reductor. Si sale la mitad, probablemente se
@@ -290,7 +290,7 @@ Map.onClick(function (coords) {
  * 1. Añade un segundo botón que mida el área con el umbral en 0,2 en vez de 0.
  *    ¿Cuánto cambia? (Es más de lo que parece, y es el tema del script 2.)
  *
- * 2. Cambia FECHA a '2018-09-24' y vuelve a medir. Son 251 ha: la misma
+ * 2. Cambia FECHA a '2026-09-02' y vuelve a medir. Son 133 ha: la misma
  *    marisma, seis meses después. Ese contraste es la aplicación entera.
  *
  * 3. Pon `getInfo()` en lugar de `evaluate()` en `medirArea` y mira la

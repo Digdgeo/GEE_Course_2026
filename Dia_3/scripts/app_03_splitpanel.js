@@ -1,5 +1,5 @@
 /**
- * Día 3 · App 3/4 — Dos mapas, una cortinilla
+ * Día 3 · App 3/4 — Dos mapas, un slide
  * Curso «Análisis geoespacial avanzado con Google Earth Engine» — CSIC / EBD, 2026
  *
  * El componente que más impresiona y el que menos cuesta: `ui.SplitPanel` con
@@ -15,8 +15,8 @@
  *   4. Que un panel se puede meter DENTRO de un mapa, que es la manera fácil
  *      de poner un control en cada lado.
  *
- * EL CASO: marzo de 2018 contra marzo de 2024. El mismo mes del año, la misma
- * marisma, seis años de diferencia. 19.313 ha contra 3.699 ha.
+ * EL CASO: febrero de 2026 contra marzo de 2024. La misma
+ * marisma, seis años de diferencia. 27.557 ha contra 3.699 ha.
  */
 
 // ===========================================================================
@@ -33,7 +33,7 @@ var UMBRAL = 0;
 // Las dos fechas de arranque. Las dos con el parque observado por encima del
 // 97 %, elegidas a propósito: comparar una fecha nublada con una limpia no
 // compara dos marismas, compara dos días de nubes.
-var IZQUIERDA = '2018-03-28';
+var IZQUIERDA = '2026-02-14';
 var DERECHA   = '2024-03-11';
 
 var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterBounds(ROI);
@@ -97,7 +97,7 @@ var mapaDer = ui.Map();
 // ===========================================================================
 
 /*
- * Sin esto la cortinilla engaña: arrastras la barra y los dos lados están
+ * Sin esto el slide engaña: arrastras la barra y los dos lados están
  * centrados en sitios distintos, así que la comparación no compara nada. El
  * `Linker` sincroniza centro y zoom de todos los mapas que le pases.
  *
@@ -109,7 +109,7 @@ var enlace = ui.Map.Linker([mapaIzq, mapaDer]);
 mapaIzq.centerObject(ROI, 10);
 
 // ===========================================================================
-// 4. LA CORTINILLA
+// 4. EL SLIDE
 // ===========================================================================
 
 /*
@@ -118,10 +118,10 @@ mapaIzq.centerObject(ROI, 10);
  * de que a partir de aquí los `Map.addLayer` del principio dejen de verse: no
  * están rotos, es que ese mapa ya no está en pantalla.
  *
- * `wipe: true` es lo que convierte el panel partido en cortinilla: en vez de
+ * `wipe: true` es lo que convierte el panel partido en slide: en vez de
  * dos mitades fijas, una barra que se arrastra.
  */
-var cortinilla = ui.SplitPanel({
+var slide = ui.SplitPanel({
   firstPanel: mapaIzq,
   secondPanel: mapaDer,
   orientation: 'horizontal',
@@ -129,7 +129,7 @@ var cortinilla = ui.SplitPanel({
   style: {stretch: 'both'}
 });
 
-ui.root.widgets().reset([cortinilla]);
+ui.root.widgets().reset([slide]);
 
 // ===========================================================================
 // 5. UN CONTROL EN CADA LADO
@@ -212,7 +212,7 @@ function montarLado(mapa, anio, fechaInicial, posicion, color) {
   });
 }
 
-montarLado(mapaIzq, 2018, IZQUIERDA, 'top-left',    '#1f6feb');
+montarLado(mapaIzq, 2026, IZQUIERDA, 'top-left',    '#1f6feb');
 montarLado(mapaDer, 2024, DERECHA,   'top-right',   '#d1495b');
 
 /*
@@ -228,7 +228,7 @@ montarLado(mapaDer, 2024, DERECHA,   'top-right',   '#d1495b');
 /*
  * CONTROL — con las dos fechas de arranque:
  *
- *   2018-03-28    19.313 ha    36,2 % del parque    observado 99 %
+ *   2026-02-14    27.557 ha    51,7 % del parque    observado 100 %
  *   2024-03-11     3.699 ha     6,9 % del parque    observado 98 %
  *
  * Cinco veces menos agua en el mismo mes del año. Y como los dos días están
@@ -236,13 +236,13 @@ montarLado(mapaDer, 2024, DERECHA,   'top-right',   '#d1495b');
  * marisma seca.
  *
  * Conviene decir en voz alta lo que la comparación NO demuestra. Dos fechas
- * sueltas no son una tendencia: 2018 fue un año húmedo y 2024 el final de una
+ * sueltas no son una tendencia: 2026 fue un año húmedo y 2024 el final de una
  * sequía larga, así que esto son los dos extremos de lo que sabemos hacer. Lo
  * que mide de verdad la marisma es el **hidroperiodo** —cuántos días al año
  * está inundado cada píxel—, y eso necesita el ciclo entero, que es lo que
  * monta el script 4.
  *
- * Una cortinilla es un instrumento de comunicación extraordinario y por eso
+ * Un slide es un instrumento de comunicación extraordinario y por eso
  * mismo hay que tratarla con cuidado: con dos fechas bien elegidas se
  * demuestra casi cualquier cosa.
  */
@@ -252,19 +252,19 @@ montarLado(mapaDer, 2024, DERECHA,   'top-right',   '#d1495b');
 // ===========================================================================
 
 /*
- * 1. Pon las dos fechas en el mismo año (2018 a los dos lados) y compara
- *    enero con marzo: la crecida de la primavera de 2018, dentro de un ciclo.
+ * 1. Pon las dos fechas en el mismo año (2026 a los dos lados) y compara
+ *    enero con marzo: la crecida de la primavera de 2026, dentro de un ciclo.
  *
  * 2. Añade a cada lado un `ui.Checkbox` que cambie el fondo entre 'SATELLITE'
  *    y 'HYBRID'. El fondo importa más de lo que parece cuando hay que explicar
  *    qué es un lucio y qué es un arrozal.
  *
- * 3. La cortinilla vertical: cambia `orientation` a 'vertical'. ¿Se lee mejor
+ * 3. El slide vertical: cambia `orientation` a 'vertical'. ¿Se lee mejor
  *    o peor una marisma partida en horizontal?
  *
  * 4. El difícil, y el que de verdad enseña: en vez de dos mapas con la misma
  *    capa, pinta en el mapa derecho **la diferencia** entre las dos fechas
- *    (agua en 2018 y no en 2024, en un color; lo contrario, en otro). Pista:
+ *    (agua en 2026 y no en 2024, en un color; lo contrario, en otro). Pista:
  *    `aguaA.unmask(0).subtract(aguaB.unmask(0))` y una paleta de tres clases.
  *    Cuidado con `unmask`, que convierte el «no observado» en «seco» — que es
  *    justo el error del §6 del script 2, y aquí lo estás cometiendo a sabiendas

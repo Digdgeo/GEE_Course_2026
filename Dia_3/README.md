@@ -39,7 +39,7 @@ una aplicación entera en JavaScript.
 
 Se monta entre todos una aplicación de verdad, la que se usa en el LAST-EBD reducida a lo
 que cabe en una mañana: selector de fecha, máscara de inundación sobre la imagen de fondo,
-cortinilla para comparar dos fechas y una gráfica de superficie inundada.
+slide para comparar dos fechas y una gráfica de superficie inundada.
 
 Está escrita en los cuatro `app_0*.js`, que se recorren en orden. El contorno del parque sale
 de **WDPA** (World Database on Protected Areas, del WCMC): límite oficial, citable y de una
@@ -66,8 +66,8 @@ siguiente, y eso es justamente el mensaje del día.
 |---|---|
 | [`app_01_panel_basico.js`](scripts/app_01_panel_basico.js) | `ui.Panel`, `ui.Label` y `ui.Button`, `Map.onClick`, y **`evaluate()` en lugar de `getInfo()`**, que es la regla del día |
 | [`app_02_selector_fechas.js`](scripts/app_02_selector_fechas.js) | `ui.Select` alimentado desde el servidor, `ui.Slider` para el umbral, y la capa que se **sustituye** en vez de acumularse. Con el aviso de cobertura: lo que no se vio no es agua que no hay |
-| [`app_03_splitpanel.js`](scripts/app_03_splitpanel.js) | Dos mapas con `ui.Map`, `ui.Map.Linker` para que vayan juntos y `ui.SplitPanel` con cortinilla. Marzo de 2018 contra marzo de 2024 |
-| [`app_04_inundacion.js`](scripts/app_04_inundacion.js) | **El visor completo**: panel lateral, cortinilla, la gráfica del ciclo con la superficie observada encima, leyenda a mano, serie del píxel al pinchar, estado de la aplicación y las cuatro cosas que hay que saber antes de publicar |
+| [`app_03_splitpanel.js`](scripts/app_03_splitpanel.js) | Dos mapas con `ui.Map`, `ui.Map.Linker` para que vayan juntos y `ui.SplitPanel` con slide. Febrero de 2026 contra marzo de 2024 |
+| [`app_04_inundacion.js`](scripts/app_04_inundacion.js) | **El visor completo**: panel lateral, slide, la gráfica del ciclo con la superficie observada encima, leyenda a mano, serie del píxel al pinchar, estado de la aplicación y las cuatro cosas que hay que saber antes de publicar |
 | [`algas_embalses_base.js`](scripts/algas_embalses_base.js) | **El análisis antes de la interfaz**: afloramientos de algas en seis embalses andaluces, con NDCI y FAI sobre la lámina de agua del JRC. Sin un solo `ui.*` |
 
 ## ✅ Ejercicio del día

@@ -12,7 +12,7 @@
  *
  * LO QUE HACE
  *   · Elegir fecha dentro de un ciclo hidrológico y ver la lámina de agua.
- *   · Cortinilla para comparar dos fechas cualesquiera del ciclo.
+ *   · Slide para comparar dos fechas cualesquiera del ciclo.
  *   · La serie del ciclo entero, con la superficie inundada **y la observada**.
  *   · Avisar cuando la cifra no es fiable porque ese día no se vio el parque.
  *   · Interrogar un píxel: su valor hoy y su serie en el ciclo.
@@ -29,11 +29,11 @@
 // 1. CONFIGURACIÓN — todo lo que se toca, junto y arriba
 // ===========================================================================
 
-var CICLO_INICIO = '2017-10-01';
-var CICLO_FIN    = '2018-10-01';
+var CICLO_INICIO = '2025-10-01';
+var CICLO_FIN    = '2026-10-01';
 
-var FECHA_A = '2018-01-22';   // lado izquierdo de la cortinilla
-var FECHA_B = '2018-03-28';   // lado derecho
+var FECHA_A = '2025-12-11';   // lado izquierdo del slide
+var FECHA_B = '2026-02-14';   // lado derecho
 
 var UMBRAL = 0;               // MNDWI por encima de esto es agua
 var MINIMO_VISTO = 90;        // % del parque observado para fiarse de la cifra
@@ -95,7 +95,7 @@ var diarios = ee.ImageCollection(fechas.map(function (f) {
 }));
 
 // ===========================================================================
-// 3. LA VENTANA: PANEL DE CONTROL + CORTINILLA
+// 3. LA VENTANA: PANEL DE CONTROL + SLIDE
 // ===========================================================================
 
 var mapaIzq = ui.Map();
@@ -110,7 +110,7 @@ var mapaDer = ui.Map();
 var enlace = ui.Map.Linker([mapaIzq, mapaDer]);
 mapaIzq.centerObject(ROI, 10);
 
-var cortinilla = ui.SplitPanel({
+var slide = ui.SplitPanel({
   firstPanel: mapaIzq,
   secondPanel: mapaDer,
   orientation: 'horizontal',
@@ -130,7 +130,7 @@ var control = ui.Panel({
  *
  * Es LA línea que hay que mirar si la aplicación sale descolocada.
  */
-ui.root.widgets().reset([control, cortinilla]);
+ui.root.widgets().reset([control, slide]);
 ui.root.setLayout(ui.Panel.Layout.flow('horizontal'));
 
 // ===========================================================================
@@ -247,12 +247,12 @@ var selectorDer = ui.Select({
   onChange: function (f) { pintarLado('der', f); }
 });
 
-control.add(ui.Label('Izquierda de la cortinilla', {fontSize: '12px', fontWeight: 'bold'}));
+control.add(ui.Label('Izquierda del slide', {fontSize: '12px', fontWeight: 'bold'}));
 control.add(selectorIzq);
 control.add(cifraIzq);
 control.add(notaIzq);
 
-control.add(ui.Label('Derecha de la cortinilla',
+control.add(ui.Label('Derecha del slide',
                      {fontSize: '12px', fontWeight: 'bold', margin: '14px 0 0 0'}));
 control.add(selectorDer);
 control.add(cifraDer);
@@ -395,7 +395,7 @@ control.add(leyenda);
 
 /*
  * El clic se registra en los dos mapas, porque el usuario no tiene por qué
- * saber en qué mitad de la cortinilla ha pinchado.
+ * saber en qué mitad del slide ha pinchado.
  *
  * Y aquí sí hay un cálculo caro en respuesta a un clic: la serie de ese píxel
  * en el ciclo entero. Se permite porque es **un píxel** —no 53.000 ha— y
@@ -452,7 +452,7 @@ mapaDer.onClick(consultarPixel);
  * lista de fechas no hay nada que elegir.
  *
  * Y arranca con dos fechas elegidas a mano, no con las dos primeras de la
- * lista: enero contra marzo de 2018 es la crecida del ciclo, y una aplicación
+ * lista: diciembre contra febrero es la crecida del ciclo, y una aplicación
  * tiene que abrir enseñando lo que sabe hacer. Si abre en un mapa vacío, el
  * usuario cierra la pestaña.
  */
@@ -477,19 +477,19 @@ fechas.evaluate(function (lista) {
 /*
  * CONTROL — al abrir, la aplicación tiene que dar:
  *
- *   izquierda  2018-01-22    4.276 ha   ·  8,0 %   ·  observado 100 %
- *   derecha    2018-03-28   19.313 ha   ·  36,2 %  ·  observado  99 %
+ *   izquierda  2025-12-11    4.211 ha   ·   7,9 %  ·  observado 100 %
+ *   derecha    2026-02-14   27.557 ha   ·  51,7 %  ·  observado 100 %
  *
  * Y en la gráfica, el pico de finales de marzo con la línea gris pegada
  * arriba la mayor parte del tiempo, y cayendo a plomo en los días de nubes.
- * Esos desplomes no son tres o cuatro: de las **68 fechas del ciclo**, 28
- * tienen menos del 90 % del parque observado, **17 menos del 50 %** y 6 menos
- * del 5 %. La mediana, eso sí, es del 97 %.
+ * Esos desplomes no son tres o cuatro: de las **103 fechas del ciclo**, 48
+ * tienen menos del 90 % del parque observado, **30 menos del 50 %** y 14 menos
+ * del 5 %. La mediana, eso sí, es del 95 %.
  *
  * Y ahí está la lección de la gráfica, que es el motivo de dibujar la línea
- * gris: en esas 17 fechas la cifra de hectáreas inundadas no es baja porque
+ * gris: en esas 30 fechas la cifra de hectáreas inundadas no es baja porque
  * haya poca agua, es baja porque no se ve el parque. Un visor que solo pintara
- * la línea azul estaría mintiendo diecisiete veces por ciclo.
+ * la línea azul estaría mintiendo treinta veces por ciclo.
  */
 
 // ===========================================================================
@@ -528,7 +528,7 @@ fechas.evaluate(function (lista) {
 /*
  * 1. Haz que la gráfica siga al deslizador del umbral. Funciona, y notarás
  *    exactamente por qué no viene así: cada movimiento del deslizador vuelve a
- *    reducir 68 fechas. Mídelo, y después decide tú. Un `ui.Button` de
+ *    reducir 103 fechas. Mídelo, y después decide tú. Un `ui.Button` de
  *    «recalcular la gráfica» es una solución perfectamente profesional.
  *
  * 2. Añade un `ui.Textbox` para el año y que la aplicación cambie de ciclo. Es
