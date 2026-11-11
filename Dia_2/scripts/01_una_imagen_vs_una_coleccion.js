@@ -141,8 +141,20 @@ print('Y con menos del 20 % de nubes:', limpia.size());
 
 // Una función que calcula el NDVI de UNA imagen...
 function anadirNDVI(imagen) {
-  var ndvi = imagen.divide(10000).normalizedDifference(['B8', 'B4']).rename('NDVI');
-  return imagen.addBands(ndvi).copyProperties(imagen, ['system:time_start']);
+  // LAS NUBES SE QUITAN AQUÍ, PÍXEL A PÍXEL, y no es lo mismo que el filtro de
+  // arriba. `CLOUDY_PIXEL_PERCENTAGE < 20` descarta **escenas enteras**: deja
+  // fuera el día muy nublado, pero no la nube suelta de un día bueno, que
+  // sigue dentro y envenena el compuesto. La banda `SCL` trae la clasificación
+  // que hace el propio procesador de Sentinel-2, píxel por píxel.
+  var scl = imagen.select('SCL');
+  var mala = scl.eq(3)                     // 3  sombra de nube
+    .or(scl.eq(8)).or(scl.eq(9))           // 8  y 9  nube probable y muy probable
+    .or(scl.eq(10))                        // 10 cirros
+    .or(scl.eq(11));                       // 11 nieve
+  var limpia = imagen.updateMask(mala.not());
+
+  var ndvi = limpia.divide(10000).normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return limpia.addBands(ndvi).copyProperties(imagen, ['system:time_start']);
 }
 
 // ...y `.map()`, que la aplica a TODAS. Esto es el `forEach` del repaso de
@@ -189,6 +201,11 @@ Map.addLayer(minimo.clip(zona),  visNDVI, '3. Mínimo de 2024', false);
 // Esta capa es la que nadie mira y la que explica la mitad de los resultados
 // raros: el número de observaciones válidas cambia de un píxel a otro, porque
 // las nubes no caen igual en todas partes.
+//
+// Y es la comprobación de que el enmascarado funciona: si esta capa sale de un
+// solo color, con el mismo número en todos los píxeles, es que NO se están
+// quitando las nubes y `count()` solo está contando escenas. Pincha con el
+// Inspector en dos sitios separados y compara.
 Map.addLayer(cuantos.clip(zona), {min: 0, max: 60, palette: ['red', 'yellow', 'green']},
              '3. Nº de escenas válidas por píxel', false);
 
