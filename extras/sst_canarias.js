@@ -62,9 +62,22 @@ print('SST agosto 2024, recuadro entero (p5 / mediana / p95):',
 
 /*
  * Mira el mapa: la lengua fría pegada a la costa africana es el **afloramiento
- * costero**. El alisio sopla paralelo a la costa, el transporte de Ekman
- * aparta el agua superficial mar adentro y por debajo sube agua fría y rica
- * en nutrientes. Es lo que sostiene la pesquería del banco sahariano.
+ * costero**, uno de los cuatro grandes del mundo (la corriente de Canarias,
+ * junto con las de Benguela, Humboldt y California).
+ *
+ * El mecanismo, en tres pasos:
+ *   1. El alisio sopla casi todo el año paralelo a la costa, de norte a sur.
+ *   2. Por la rotación de la Tierra, el agua empujada por el viento no va en
+ *      la dirección del viento sino desviada a la derecha: el transporte de
+ *      Ekman la aparta de la costa, mar adentro.
+ *   3. Ese hueco lo rellena agua que sube desde 100-200 m de profundidad. Y
+ *      esa agua es **fría** —de ahí la lengua azul— y **rica en nutrientes**,
+ *      porque los nitratos y fosfatos se acumulan en profundidad cuando la
+ *      materia orgánica que cae desde arriba se descompone.
+ *
+ * Es lo que sostiene la pesquería del banco sahariano, y la razón de que las
+ * cuatro zonas de afloramiento del mundo den una parte desproporcionada de la
+ * pesca mundial con una fracción mínima de la superficie del océano.
  *
  * Vamos a medirlo en vez de mirarlo, que es lo que enseña este curso.
  */
@@ -78,6 +91,18 @@ Map.addLayer(cajas.style({color: 'white', fillColor: '00000000', width: 2}), {},
 print('Gradiente de afloramiento, agosto 2024 (°C):',
       agosto24.reduceRegions({collection: cajas, reducer: ee.Reducer.mean(), scale: 5000})
               .select(['sitio', 'mean'], null, false));
+
+/*
+ * Y no es cosa de un mes suelto. Medido para los veranos de 2019 a 2025, la
+ * caja de la costa africana sale siempre entre 2,6 y 3,2 °C por debajo de la
+ * de océano abierto, y en invierno sigue 2,0 °C por debajo:
+ *
+ *      verano 2019  -3,17 °C      verano 2024  -2,78 °C
+ *      verano 2021  -2,72 °C      verano 2025  -2,93 °C
+ *      verano 2023  -2,64 °C      invierno 2025  -1,97 °C
+ *
+ * Cámbiale las fechas y compruébalo tú, que para eso está escrito así.
+ */
 
 // =========================================================================
 // 2. RESOLUCIÓN CONTRA LONGITUD DE LA SERIE
@@ -175,8 +200,37 @@ Map.addLayer(anomalia23, {min: -2, max: 2,
  *    Repite con GCOM-C a 4,6 km y mira si aparece.
  * 2. Cuenta cuántos días del verano de 2023 superaron el percentil 90 de su
  *    propia climatología. Esa es, a grandes rasgos, la definición operativa
- *    de ola de calor marina (Hobday et al., 2016), y sale con
- *    `ee.Reducer.percentile` sobre la serie diaria.
+ *    de ola de calor marina (Hobday et al., 2016): el umbral se calcula **para
+ *    cada día del año por separado**, con una ventana de ±5 días y una
+ *    referencia de 30 años, y hace falta encadenar **5 días o más** por encima
+ *    para llamarlo ola de calor.
+ *
+ *    La respuesta, para que puedas comprobar la tuya: con la referencia
+ *    1982-2011 y la caja `oeste`, el verano de 2023 da **118 días de 122 por
+ *    encima del umbral, todos seguidos**, con un exceso medio de +0,94 °C y un
+ *    máximo de +1,41 °C el 23 de junio.
+ *
+ *    Y antes de creértelo, la pregunta que hay que hacerse: ¿no estará el
+ *    umbral mal, si una referencia de hace cuarenta años la supera cualquier
+ *    verano de ahora? Compruébalo con otros años. Sale esto:
+ *
+ *      2010   0 días      2021  11 días      2023  **118 días**
+ *      2019   0 días      2022   7 días      2024    6 días
+ *      2015  45 días      2025  23 días
+ *
+ *    O sea que no: el umbral discrimina perfectamente, y 2023 está solo. Es el
+ *    único de los diez años mirados cuya media de verano queda POR ENCIMA del
+ *    propio percentil 90.
  * 3. Cruza la SST con la clorofila: `NASA/OCEANDATA/MODIS-Aqua/L3SMI`, banda
- *    `chlor_a`, misma zona. El afloramiento debería verse frío **y** verde.
+ *    `chlor_a`, en las mismas tres cajas. La predicción no es que la clorofila
+ *    esté «más fría» —son dos magnitudes distintas— sino que **la misma caja
+ *    que sale fría tiene que salir verde**: el agua que sube es fría *y* trae
+ *    los nutrientes, así que las dos señales marcan el mismo sitio por la
+ *    misma causa. Y se cumple de sobra, está medido:
+ *
+ *      verano 2023   costa 2,373 mg/m³   abierto 0,090   → ×26
+ *      verano 2024   costa 5,265 mg/m³   abierto 0,107   → ×49
+ *
+ *    Esa es la diferencia entre un desierto oceánico y una de las zonas más
+ *    productivas del planeta, y están a 400 km la una de la otra.
  */

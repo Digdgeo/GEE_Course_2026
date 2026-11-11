@@ -3,6 +3,25 @@
 // ============================================================================
 // Este script combina datos de Landsat 5, 7, 8 y 9 para calcular el índice
 // MNDWI (Modified Normalized Difference Water Index) en 4 períodos de 10 años
+//
+// CIFRAS DE CONTROL (medidas contra Earth Engine el 11-nov-2026). Si al
+// ejecutarlo te salen muy distintas, algo ha cambiado:
+//   escenas con menos del 20 % de nube:  L5 533 · L7 579 · L8 283 · L9 87 = 1.482
+//   escenas y agua (p98 MNDWI > 0) por década, midiendo a 300 m:
+//     1984-1994   231 escenas   105.098 ha
+//     1994-2004   253 escenas   109.000 ha
+//     2004-2014   332 escenas   108.270 ha
+//     2014-2024   656 escenas    96.837 ha
+//   OJO al comparar esas cuatro cifras entre sí: cada década se calcula con un
+//   número muy distinto de escenas (de 231 a 656), y el percentil 98 depende de
+//   cuántas haya. La diferencia que ves no es solo del agua.
+//
+// ⚠️ MEDIR ÁREAS AQUÍ, CON CUIDADO. Pintar las capas en el mapa es barato,
+// porque GEE calcula solo lo que cabe en pantalla. Pero un `reduceRegion` a 30 m
+// sobre toda la caja y sobre un compuesto de una década entera **se cae con
+// «User memory limit exceeded»** — comprobado. Si quieres cuantificar, hazlo a
+// una escala más gruesa (`scale: 300`) o con `bestEffort: true`, o reduce la
+// caja. Es el error con el que más gente se encuentra la primera vez.
 
 // ----------------------------------------------------------------------------
 // 1. CONFIGURACIÓN INICIAL
@@ -102,7 +121,12 @@ function calcularMNDWI(imagen) {
   //
   // El CRS y la escala se fijan EN LA EXPORTACIÓN, donde `crs` y `escala` se
   // siguen usando. Ahí sí.
-  return mndwi.clip(extent).select('MNDWI');
+  // `copyProperties` para no perder la fecha. Hoy no hace falta, porque las
+  // décadas se filtran ANTES de llamar a esta función, pero si algún día se
+  // invierte ese orden —filtrar la colección de MNDWI por fecha— sin esta línea
+  // saldrían colecciones vacías y sin ningún error que lo avise.
+  return mndwi.clip(extent).select('MNDWI')
+              .copyProperties(imagen, ['system:time_start']);
 }
 
 /**
