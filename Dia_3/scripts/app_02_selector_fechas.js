@@ -143,11 +143,22 @@ Map.add(panel);
  * Poner el umbral en la interfaz no es una floritura: es **enseñar que el
  * resultado depende de una decisión**, en vez de esconderla en el código.
  */
+/*
+ * OJO CON EL DESLIZADOR Y LOS DECIMALES. La primera versión de esto iba de
+ * -0.3 a 0.4 con paso 0.05, que es lo natural para un MNDWI... y en pantalla
+ * aparecía `5.551115123125783e-17` en lugar de `0`. No es un fallo de Earth
+ * Engine: es que `-0.3 + 6*0.05` NO da 0 en coma flotante, ni en JavaScript ni
+ * en Python ni en ningún sitio. Pruébalo en la consola.
+ *
+ * Como `ui.Slider` enseña su valor tal cual y no se le puede dar formato, la
+ * solución es trabajar en centésimas, que son números enteros y por tanto
+ * exactos, y dividir entre 100 al usarlo.
+ */
 var deslizador = ui.Slider({
-  min: -0.3,
-  max: 0.4,
+  min: -30,          // centésimas de MNDWI: -0.30
+  max: 40,           //                       0.40
   value: 0,
-  step: 0.05,
+  step: 5,           //                       0.05
   style: {stretch: 'horizontal'}
 });
 
@@ -158,7 +169,7 @@ var deslizador = ui.Slider({
 var VIS_AGUA = {palette: ['#1f6feb']};
 
 function mostrar(fechaTexto) {
-  var umbral = deslizador.getValue();
+  var umbral = deslizador.getValue() / 100;   // de centésimas a MNDWI
 
   var indice = mosaicoDelDia(fechaTexto);
   var agua = indice.gt(umbral).selfMask();
@@ -219,7 +230,7 @@ var selector = ui.Select({
 
 panel.add(ui.Label('Fecha', {fontSize: '12px', margin: '8px 0 2px 0'}));
 panel.add(selector);
-panel.add(ui.Label('Umbral de MNDWI', {fontSize: '12px', margin: '10px 0 0 0'}));
+panel.add(ui.Label('Umbral de MNDWI (centésimas)', {fontSize: '12px', margin: '10px 0 0 0'}));
 panel.add(deslizador);
 panel.add(etiquetaArea);
 panel.add(etiquetaVisto);

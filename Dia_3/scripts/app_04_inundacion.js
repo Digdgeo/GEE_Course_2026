@@ -264,20 +264,31 @@ control.add(notaDer);
  * ya estaba pintado y el mapa no cambiaría. Es el fallo clásico de tener
  * estado, y se ve una vez y no se olvida.
  */
+/*
+ * OJO CON EL DESLIZADOR Y LOS DECIMALES. La primera versión de esto iba de
+ * -0.3 a 0.4 con paso 0.05, que es lo natural para un MNDWI... y en pantalla
+ * aparecía `5.551115123125783e-17` en lugar de `0`. No es un fallo de Earth
+ * Engine: es que `-0.3 + 6*0.05` NO da 0 en coma flotante, ni en JavaScript ni
+ * en Python ni en ningún sitio. Pruébalo en la consola.
+ *
+ * Como `ui.Slider` enseña su valor tal cual y no se le puede dar formato, la
+ * solución es trabajar en centésimas, que son números enteros y por tanto
+ * exactos, y dividir entre 100 al usarlo.
+ */
 var deslizador = ui.Slider({
-  min: -0.3, max: 0.4, value: UMBRAL, step: 0.05,
+  min: -30, max: 40, value: UMBRAL * 100, step: 5,   // centésimas de MNDWI
   style: {stretch: 'horizontal'}
 });
 
 deslizador.onChange(function (v) {
-  estado.umbral = v;
+  estado.umbral = v / 100;                            // de centésimas a MNDWI
   estado.izq = null;
   estado.der = null;
   pintarLado('izq', selectorIzq.getValue());
   pintarLado('der', selectorDer.getValue());
 });
 
-control.add(ui.Label('Umbral de MNDWI para considerar agua',
+control.add(ui.Label('Umbral de MNDWI para considerar agua (centésimas)',
                      {fontSize: '12px', fontWeight: 'bold', margin: '16px 0 0 0'}));
 control.add(deslizador);
 control.add(ui.Label('Por encima de 0 es la convención. Súbelo y verás ' +
