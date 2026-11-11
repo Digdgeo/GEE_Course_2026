@@ -74,8 +74,52 @@ var FECHA = '2026-02-14';
  *     desde esa misma baseline: el código se ejecuta, no da error y no
  *     enmascara nada. Es el fallo silencioso más caro de Sentinel-2.
  */
-var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
-  .filterBounds(ROI);
+// ---------------------------------------------------------------------------
+// EL HUSO UTM: una opción que conviene entender antes de tocarla
+// ---------------------------------------------------------------------------
+/*
+ * Doñana está pegada al meridiano de 6° W, que separa los husos UTM 29 y 30.
+ * El parque entero cae al oeste (de 6,56° a 6,25° W), o sea **dentro del huso
+ * 29**, pero los tiles de Sentinel-2 se solapan y los del huso 30 se estiran
+ * hacia el oeste, así que la consulta devuelve **cuatro**: 29SQA y 29SQB en
+ * EPSG:32629, y 30STF y 30STG en EPSG:32630.
+ *
+ * Y MEZCLARLOS TIENE UN COSTE QUE NO SE VE. Las dos mallas de 10 m no
+ * coinciden —son dos sistemas distintos, con orígenes distintos—, así que para
+ * poner un píxel del huso 30 en la malla del 29 hay que **interpolarlo**, y el
+ * valor que sale no es el que midió el satélite. Como `mosaic()` no promedia
+ * sino que se queda con la primera imagen que cubre cada píxel, **el resultado
+ * depende del orden de la colección**, que no ha decidido nadie.
+ *
+ * Medido sobre el 14-feb-2026, comparando el mismo día mosaicado en un orden y
+ * en el otro:
+ *
+ *   · el MNDWI cambia en 29.230 ha, el 54,8 % del parque
+ *   · cambia más de 0,01 en el 13,2 % · más de 0,05 en el 2,2 %
+ *   · y 147 ha cambian de clase: donde una versión dice agua, la otra dice seco
+ *   · la superficie inundada total pasa de 27.557 a 27.596 ha según el orden
+ *
+ * Nada de eso es un error del dato: es el precio de remuestrear entre husos.
+ * Por eso aquí se puede elegir, y por defecto se trabaja con un solo huso.
+ *
+ *   HUSO = 29   solo los tiles del huso 29  (lo correcto para Doñana)
+ *   HUSO = 30   solo los del huso 30
+ *   HUSO = 0    todos, mezclados, como venía antes
+ *
+ * ¿Qué se pierde con 29? Casi nada: la parte del parque que ven los tiles del
+ * huso 30 y no ven los del 29 son **3 ha** de 53.327. Si cambias la zona de
+ * estudio a un sitio que sí cruce el meridiano, entonces sí hay que pensarlo.
+ */
+var HUSO = 29;
+
+/** Deja en la colección solo los tiles del huso elegido. HUSO = 0 no filtra. */
+function soloHuso(coleccion) {
+  if (!HUSO) return coleccion;
+  return coleccion.filter(ee.Filter.stringStartsWith('MGRS_TILE', String(HUSO)));
+}
+
+var s2 = soloHuso(ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterBounds(ROI));
 
 function sinNubes(imagen) {
   var scl = imagen.select('SCL');
@@ -113,9 +157,9 @@ var fecha = ee.Date(FECHA);
  *
  *     .filter(ee.Filter.inList('MGRS_TILE', ['29SQA', '29SQB']))
  *
- * Medido sobre el 14-feb-2026: con los cuatro, 27.557 ha y 99,63 % del parque
+ * Medido sobre el 14-feb-2026: con los cuatro, 27.561 ha y 99,63 % del parque
  * observado; con dos, 27.561 ha y 99,62 %. Cuatro hectáreas de diferencia
- * sobre 27.557, y la mitad de datos que mover. El matiz está en las fechas
+ * sobre 27.561, y la mitad de datos que mover. El matiz está en las fechas
  * nubladas, donde el solape sí aporta: el 5-ene-2026 pasa de 82,4 % a 80,7 %
  * de parque observado. Decidir si compensa es parte del trabajo.
  *
@@ -238,7 +282,7 @@ function medirArea() {
       reducer: ee.Reducer.sum(),
       geometry: ROI,
       // 30 m, no 10 m. A 10 m son 5,3 millones de píxeles y a 30 m son 590.000.
-      // Medido sobre esta misma fecha: 19.312 ha a 10 m y 27.557 ha a 30 m
+      // Medido sobre esta misma fecha: 19.312 ha a 10 m y 27.561 ha a 30 m
       // —una diferencia del 0,005 %— y menos de la mitad de espera. En una
       // interfaz, eso decide si la usa alguien.
       scale: 30,
@@ -275,7 +319,7 @@ panel.add(resultado);
 /*
  * CONTROL — con el script tal cual, el botón tiene que dar:
  *
- *   27.557 ha · 51,7 % del parque
+ *   27.561 ha · 51,7 % del parque
  *
  * Si sale eso, la cadena entera está bien: el contorno, el mosaico del día, la
  * máscara de nubes, el índice y el reductor. Si sale la mitad, probablemente se
@@ -337,7 +381,7 @@ Map.onClick(function (coords) {
  * 1. Añade un segundo botón que mida el área con el umbral en 0,2 en vez de 0.
  *    ¿Cuánto cambia? (Es más de lo que parece, y es el tema del script 2.)
  *
- * 2. Cambia FECHA a '2026-09-02' y vuelve a medir. Son 133 ha: la misma
+ * 2. Cambia FECHA a '2026-09-02' y vuelve a medir. Son 136 ha: la misma
  *    marisma, seis meses después. Ese contraste es la aplicación entera.
  *
  * 3. Pon `getInfo()` en lugar de `evaluate()` en `medirArea` y mira la

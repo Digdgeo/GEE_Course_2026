@@ -16,7 +16,7 @@
  *      de poner un control en cada lado.
  *
  * EL CASO: febrero de 2026 contra marzo de 2024. La misma
- * marisma, seis años de diferencia. 27.557 ha contra 3.699 ha.
+ * marisma, dos años de diferencia. 27.561 ha contra 3.695 ha.
  */
 
 // ===========================================================================
@@ -36,7 +36,51 @@ var UMBRAL = 0;
 var IZQUIERDA = '2026-02-14';
 var DERECHA   = '2024-03-11';
 
-var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterBounds(ROI);
+// ---------------------------------------------------------------------------
+// EL HUSO UTM: una opción que conviene entender antes de tocarla
+// ---------------------------------------------------------------------------
+/*
+ * Doñana está pegada al meridiano de 6° W, que separa los husos UTM 29 y 30.
+ * El parque entero cae al oeste (de 6,56° a 6,25° W), o sea **dentro del huso
+ * 29**, pero los tiles de Sentinel-2 se solapan y los del huso 30 se estiran
+ * hacia el oeste, así que la consulta devuelve **cuatro**: 29SQA y 29SQB en
+ * EPSG:32629, y 30STF y 30STG en EPSG:32630.
+ *
+ * Y MEZCLARLOS TIENE UN COSTE QUE NO SE VE. Las dos mallas de 10 m no
+ * coinciden —son dos sistemas distintos, con orígenes distintos—, así que para
+ * poner un píxel del huso 30 en la malla del 29 hay que **interpolarlo**, y el
+ * valor que sale no es el que midió el satélite. Como `mosaic()` no promedia
+ * sino que se queda con la primera imagen que cubre cada píxel, **el resultado
+ * depende del orden de la colección**, que no ha decidido nadie.
+ *
+ * Medido sobre el 14-feb-2026, comparando el mismo día mosaicado en un orden y
+ * en el otro:
+ *
+ *   · el MNDWI cambia en 29.230 ha, el 54,8 % del parque
+ *   · cambia más de 0,01 en el 13,2 % · más de 0,05 en el 2,2 %
+ *   · y 147 ha cambian de clase: donde una versión dice agua, la otra dice seco
+ *   · la superficie inundada total pasa de 27.557 a 27.596 ha según el orden
+ *
+ * Nada de eso es un error del dato: es el precio de remuestrear entre husos.
+ * Por eso aquí se puede elegir, y por defecto se trabaja con un solo huso.
+ *
+ *   HUSO = 29   solo los tiles del huso 29  (lo correcto para Doñana)
+ *   HUSO = 30   solo los del huso 30
+ *   HUSO = 0    todos, mezclados, como venía antes
+ *
+ * ¿Qué se pierde con 29? Casi nada: la parte del parque que ven los tiles del
+ * huso 30 y no ven los del 29 son **3 ha** de 53.327. Si cambias la zona de
+ * estudio a un sitio que sí cruce el meridiano, entonces sí hay que pensarlo.
+ */
+var HUSO = 29;
+
+/** Deja en la colección solo los tiles del huso elegido. HUSO = 0 no filtra. */
+function soloHuso(coleccion) {
+  if (!HUSO) return coleccion;
+  return coleccion.filter(ee.Filter.stringStartsWith('MGRS_TILE', String(HUSO)));
+}
+
+var s2 = soloHuso(ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED').filterBounds(ROI));
 
 function sinNubes(imagen) {
   var scl = imagen.select('SCL');
@@ -228,8 +272,8 @@ montarLado(mapaDer, 2024, DERECHA,   'top-right',   '#d1495b');
 /*
  * CONTROL — con las dos fechas de arranque:
  *
- *   2026-02-14    27.557 ha    51,7 % del parque    observado 100 %
- *   2024-03-11     3.699 ha     6,9 % del parque    observado 98 %
+ *   2026-02-14    27.561 ha    51,7 % del parque    observado 100 %
+ *   2024-03-11     3.695 ha     6,9 % del parque    observado 98 %
  *
  * Cinco veces menos agua en el mismo mes del año. Y como los dos días están
  * casi enteros observados, la diferencia no se la puede comer una nube: es

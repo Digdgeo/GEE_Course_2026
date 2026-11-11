@@ -40,8 +40,52 @@ var MINIMO_VISTO = 90;
 // 2. EL ANÁLISIS
 // ===========================================================================
 
-var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
-  .filterBounds(ROI)
+// ---------------------------------------------------------------------------
+// EL HUSO UTM: una opción que conviene entender antes de tocarla
+// ---------------------------------------------------------------------------
+/*
+ * Doñana está pegada al meridiano de 6° W, que separa los husos UTM 29 y 30.
+ * El parque entero cae al oeste (de 6,56° a 6,25° W), o sea **dentro del huso
+ * 29**, pero los tiles de Sentinel-2 se solapan y los del huso 30 se estiran
+ * hacia el oeste, así que la consulta devuelve **cuatro**: 29SQA y 29SQB en
+ * EPSG:32629, y 30STF y 30STG en EPSG:32630.
+ *
+ * Y MEZCLARLOS TIENE UN COSTE QUE NO SE VE. Las dos mallas de 10 m no
+ * coinciden —son dos sistemas distintos, con orígenes distintos—, así que para
+ * poner un píxel del huso 30 en la malla del 29 hay que **interpolarlo**, y el
+ * valor que sale no es el que midió el satélite. Como `mosaic()` no promedia
+ * sino que se queda con la primera imagen que cubre cada píxel, **el resultado
+ * depende del orden de la colección**, que no ha decidido nadie.
+ *
+ * Medido sobre el 14-feb-2026, comparando el mismo día mosaicado en un orden y
+ * en el otro:
+ *
+ *   · el MNDWI cambia en 29.230 ha, el 54,8 % del parque
+ *   · cambia más de 0,01 en el 13,2 % · más de 0,05 en el 2,2 %
+ *   · y 147 ha cambian de clase: donde una versión dice agua, la otra dice seco
+ *   · la superficie inundada total pasa de 27.557 a 27.596 ha según el orden
+ *
+ * Nada de eso es un error del dato: es el precio de remuestrear entre husos.
+ * Por eso aquí se puede elegir, y por defecto se trabaja con un solo huso.
+ *
+ *   HUSO = 29   solo los tiles del huso 29  (lo correcto para Doñana)
+ *   HUSO = 30   solo los del huso 30
+ *   HUSO = 0    todos, mezclados, como venía antes
+ *
+ * ¿Qué se pierde con 29? Casi nada: la parte del parque que ven los tiles del
+ * huso 30 y no ven los del 29 son **3 ha** de 53.327. Si cambias la zona de
+ * estudio a un sitio que sí cruce el meridiano, entonces sí hay que pensarlo.
+ */
+var HUSO = 29;
+
+/** Deja en la colección solo los tiles del huso elegido. HUSO = 0 no filtra. */
+function soloHuso(coleccion) {
+  if (!HUSO) return coleccion;
+  return coleccion.filter(ee.Filter.stringStartsWith('MGRS_TILE', String(HUSO)));
+}
+
+var s2 = soloHuso(ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterBounds(ROI))
   .filterDate(INICIO, FIN);
 
 function sinNubes(imagen) {
@@ -279,12 +323,12 @@ fechas.evaluate(function (lista) {
 /*
  * Pon el selector en **2026-01-05** y luego en **2026-02-14**:
  *
- *   2026-01-05    7.973 ha   ·  parque observado  83 %
- *   2026-02-14   27.557 ha   ·  parque observado 100 %
+ *   2026-01-05    7.654 ha   ·  parque observado  81 %
+ *   2026-02-14   27.561 ha   ·  parque observado 100 %
  *
- * Seis semanas y 19.600 ha. Buena parte es crecida de verdad —el ciclo se
+ * Seis semanas y 19.900 ha. Buena parte es crecida de verdad —el ciclo se
  * llenó de enero a febrero—, pero no toda: el día 5 de enero hay nubes sobre
- * un 17 % del parque, y bajo una nube el píxel no dice «seco», dice «no lo
+ * un 19 % del parque, y bajo una nube el píxel no dice «seco», dice «no lo
  * sé». Al enmascararlo sale del cálculo, y la suma de agua se queda corta en
  * todo lo que hubiera debajo. Sin el segundo número no hay forma de saber qué
  * parte del salto es agua y qué parte es cielo despejado.
@@ -300,7 +344,7 @@ fechas.evaluate(function (lista) {
  * donde más duele. Y la trampa es silenciosa: el número sale, es verosímil y
  * nadie se queja.
  *
- * Pruébalo también con **2025-12-26** (25 % observado, 2.084 ha): la
+ * Pruébalo también con **2025-12-26** (25 % observado, 2.134 ha): la
  * aplicación lo da en rojo, y así tiene que ser.
  */
 
@@ -321,7 +365,7 @@ fechas.evaluate(function (lista) {
  *
  * 2. Cambia INICIO y FIN a '2023-10-01' y '2024-10-01', el ciclo de la sequía,
  *    y vuelve a mirar el máximo: 3.343 ha el 20 de febrero, frente a las
- *    27.557 del 14 de febrero de 2026. La misma aplicación, el mismo código,
+ *    27.561 del 14 de febrero de 2026. La misma aplicación, el mismo código,
  *    otra marisma.
  *
  * 3. Añade un `ui.Checkbox` que encienda y apague la lámina de agua, sin

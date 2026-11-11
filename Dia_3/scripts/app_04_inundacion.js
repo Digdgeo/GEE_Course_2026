@@ -54,8 +54,52 @@ var parque = ee.FeatureCollection('WCMC/WDPA/current/polygons')
 var ROI = parque.geometry();
 var estiloParque = parque.style({color: 'ffffff', fillColor: '00000000', width: 2});
 
-var s2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
-  .filterBounds(ROI)
+// ---------------------------------------------------------------------------
+// EL HUSO UTM: una opción que conviene entender antes de tocarla
+// ---------------------------------------------------------------------------
+/*
+ * Doñana está pegada al meridiano de 6° W, que separa los husos UTM 29 y 30.
+ * El parque entero cae al oeste (de 6,56° a 6,25° W), o sea **dentro del huso
+ * 29**, pero los tiles de Sentinel-2 se solapan y los del huso 30 se estiran
+ * hacia el oeste, así que la consulta devuelve **cuatro**: 29SQA y 29SQB en
+ * EPSG:32629, y 30STF y 30STG en EPSG:32630.
+ *
+ * Y MEZCLARLOS TIENE UN COSTE QUE NO SE VE. Las dos mallas de 10 m no
+ * coinciden —son dos sistemas distintos, con orígenes distintos—, así que para
+ * poner un píxel del huso 30 en la malla del 29 hay que **interpolarlo**, y el
+ * valor que sale no es el que midió el satélite. Como `mosaic()` no promedia
+ * sino que se queda con la primera imagen que cubre cada píxel, **el resultado
+ * depende del orden de la colección**, que no ha decidido nadie.
+ *
+ * Medido sobre el 14-feb-2026, comparando el mismo día mosaicado en un orden y
+ * en el otro:
+ *
+ *   · el MNDWI cambia en 29.230 ha, el 54,8 % del parque
+ *   · cambia más de 0,01 en el 13,2 % · más de 0,05 en el 2,2 %
+ *   · y 147 ha cambian de clase: donde una versión dice agua, la otra dice seco
+ *   · la superficie inundada total pasa de 27.557 a 27.596 ha según el orden
+ *
+ * Nada de eso es un error del dato: es el precio de remuestrear entre husos.
+ * Por eso aquí se puede elegir, y por defecto se trabaja con un solo huso.
+ *
+ *   HUSO = 29   solo los tiles del huso 29  (lo correcto para Doñana)
+ *   HUSO = 30   solo los del huso 30
+ *   HUSO = 0    todos, mezclados, como venía antes
+ *
+ * ¿Qué se pierde con 29? Casi nada: la parte del parque que ven los tiles del
+ * huso 30 y no ven los del 29 son **3 ha** de 53.327. Si cambias la zona de
+ * estudio a un sitio que sí cruce el meridiano, entonces sí hay que pensarlo.
+ */
+var HUSO = 29;
+
+/** Deja en la colección solo los tiles del huso elegido. HUSO = 0 no filtra. */
+function soloHuso(coleccion) {
+  if (!HUSO) return coleccion;
+  return coleccion.filter(ee.Filter.stringStartsWith('MGRS_TILE', String(HUSO)));
+}
+
+var s2 = soloHuso(ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+  .filterBounds(ROI))
   .filterDate(CICLO_INICIO, CICLO_FIN);
 
 function sinNubes(imagen) {
@@ -477,13 +521,13 @@ fechas.evaluate(function (lista) {
 /*
  * CONTROL — al abrir, la aplicación tiene que dar:
  *
- *   izquierda  2025-12-11    4.211 ha   ·   7,9 %  ·  observado 100 %
- *   derecha    2026-02-14   27.557 ha   ·  51,7 %  ·  observado 100 %
+ *   izquierda  2025-12-11    4.170 ha   ·   7,8 %  ·  observado 100 %
+ *   derecha    2026-02-14   27.561 ha   ·  51,7 %  ·  observado 100 %
  *
  * Y en la gráfica, el pico de finales de marzo con la línea gris pegada
  * arriba la mayor parte del tiempo, y cayendo a plomo en los días de nubes.
- * Esos desplomes no son tres o cuatro: de las **103 fechas del ciclo**, 48
- * tienen menos del 90 % del parque observado, **30 menos del 50 %** y 14 menos
+ * Esos desplomes no son tres o cuatro: de las **103 fechas del ciclo**, 49
+ * tienen menos del 90 % del parque observado, **30 menos del 50 %** y 15 menos
  * del 5 %. La mediana, eso sí, es del 95 %.
  *
  * Y ahí está la lección de la gráfica, que es el motivo de dibujar la línea
