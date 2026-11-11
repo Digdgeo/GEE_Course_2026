@@ -50,10 +50,12 @@ hace solo, o hay datos propios, pandas o una base de datos por medio.
 
 | Script | Qué enseña |
 |---|---|
+| `alphaearth_parecido.js` | **AlphaEarth Foundations**: buscar por parecido con los *embeddings*, sin entrenar nada |
 | `clasificacion.js` | Clasificación supervisada, la versión JavaScript |
 | `ndvi2gif_intro.ipynb` | Composiciones estacionales y animaciones |
 | *(por escribir)* `dashboard_geemap.ipynb` | Mapa + gráfica + selector en un cuaderno |
 | *(por escribir)* `clasificacion_validacion.ipynb` | Clasificador con la validación bien hecha |
+| *(por escribir)* `alphaearth_parecido.ipynb` | El gemelo en Python de `alphaearth_parecido.js` |
 | *(por escribir)* `app_solara.py` | El cuaderno convertido en aplicación |
 
 ## ✅ Ejercicio del día
