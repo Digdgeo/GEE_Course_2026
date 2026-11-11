@@ -19,10 +19,12 @@
  * CIFRAS DE CONTROL (medidas contra Earth Engine el 11-nov-2026):
  *   · la escena que elige el `sort` es la del **3 de agosto de 2024** (tile
  *     30STG), con 0,0 % de nubosidad declarada
- *   · NDVI medio de esa escena: **0,4852**
+ *   · NDVI medio de esa escena, sin enmascarar: **0,4852**
  *   · escenas de 2024 sobre la zona: **150**, y **66** con menos del 20 % de nube
- *   · del compuesto anual: mediana **0,2047** · máximo **0,8254** · mínimo **−0,0360**
- *   · y el §4: solo mayo **0,1394**, solo agosto **0,4948**
+ *   · observaciones válidas por píxel tras la máscara SCL: entre **48** y **66**,
+ *     media **62,2**. Si esa capa sale de un solo color, la máscara no actúa
+ *   · del compuesto anual: mediana **0,2141** · máximo **0,8231** · mínimo **−0,0145**
+ *   · y el §4: solo mayo **0,1436** (10 escenas), solo agosto **0,4952** (7)
  */
 
 // ---------------------------------------------------------------------------
