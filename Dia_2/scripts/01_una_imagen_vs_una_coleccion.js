@@ -15,6 +15,14 @@
  *   §4  La trampa: lo que un compuesto esconde.
  *
  * Al final se ve por qué `ndvi_estacional.js` hace lo que hace, y no antes.
+ *
+ * CIFRAS DE CONTROL (medidas contra Earth Engine el 11-nov-2026):
+ *   · la escena que elige el `sort` es la del **3 de agosto de 2024** (tile
+ *     30STG), con 0,0 % de nubosidad declarada
+ *   · NDVI medio de esa escena: **0,4852**
+ *   · escenas de 2024 sobre la zona: **150**, y **66** con menos del 20 % de nube
+ *   · del compuesto anual: mediana **0,2047** · máximo **0,8254** · mínimo **−0,0360**
+ *   · y el §4: solo mayo **0,1394**, solo agosto **0,4948**
  */
 
 // ---------------------------------------------------------------------------
@@ -80,7 +88,7 @@ print('Nubes declaradas (%):', cruda.get('CLOUDY_PIXEL_PERCENTAGE'));
 var unaImagen = ee.Image(
   cruda.divide(10000).copyProperties(cruda, ['system:time_start']));
 
-Map.addLayer(unaImagen.clip(zona), visColor, '1. Color natural, agosto 2024');
+Map.addLayer(unaImagen.clip(zona), visColor, '1. Color natural, la escena más limpia de agosto');
 
 // El NDVI: (NIR − Rojo) / (NIR + Rojo). En Sentinel-2, B8 y B4.
 // `normalizedDifference` hace la cuenta y evita escribir la fórmula a mano,
@@ -96,7 +104,9 @@ var mediaUnDia = ndviUnaImagen.reduceRegion({
   scale: 20,
   maxPixels: 1e9
 });
-print('NDVI medio del 12 de agosto:', mediaUnDia.get('NDVI'));
+// Sin fecha escrita a mano: la escena la elige el `sort`, así que si mañana
+// el catálogo trae otra menos nubosa, el rótulo seguiría siendo correcto.
+print('NDVI medio de esa escena:', mediaUnDia.get('NDVI'));
 
 /*
  * HASTA AQUÍ no hay nada que no se pueda hacer en QGIS. La pregunta que abre
@@ -200,6 +210,14 @@ print('Máximo del NDVI medio:', maximo.reduceRegion({
  *
  * Mira las dos capas siguientes, que son la misma zona con cuatro meses de
  * diferencia. La mediana anual está entre las dos y no se parece a ninguna.
+ */
+
+/*
+ * UN AVISO QUE SE COBRA MÁS ADELANTE: esta zona la tocan dos tiles de
+ * Sentinel-2, 29SQB y 30STG, y están en husos UTM distintos. Para una imagen
+ * suelta da igual —`first()` coge una y punto—, pero en cuanto se compone una
+ * colección se mezclan dos mallas que no coinciden. En el día 3 se mide lo que
+ * eso cambia y cómo se elige un solo huso; aquí basta con saber que está ahí.
  */
 
 var mayo   = soloNDVI.filterDate('2024-05-01', '2024-05-31').median();
