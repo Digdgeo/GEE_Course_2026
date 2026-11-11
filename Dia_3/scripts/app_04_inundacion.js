@@ -481,8 +481,15 @@ fechas.evaluate(function (lista) {
  *   derecha    2018-03-28   19.313 ha   ·  36,2 %  ·  observado  99 %
  *
  * Y en la gráfica, el pico de finales de marzo con la línea gris pegada
- * arriba, más tres o cuatro desplomes simultáneos de las dos líneas, que son
- * los días de nubes.
+ * arriba la mayor parte del tiempo, y cayendo a plomo en los días de nubes.
+ * Esos desplomes no son tres o cuatro: de las **68 fechas del ciclo**, 28
+ * tienen menos del 90 % del parque observado, **17 menos del 50 %** y 6 menos
+ * del 5 %. La mediana, eso sí, es del 97 %.
+ *
+ * Y ahí está la lección de la gráfica, que es el motivo de dibujar la línea
+ * gris: en esas 17 fechas la cifra de hectáreas inundadas no es baja porque
+ * haya poca agua, es baja porque no se ve el parque. Un visor que solo pintara
+ * la línea azul estaría mintiendo diecisiete veces por ciclo.
  */
 
 // ===========================================================================
