@@ -18,6 +18,7 @@ Si lo que te sale es muy distinto, algo ha cambiado y merece la pena mirar qué.
 | [`ndvi_estacional_manual.js`](ndvi_estacional_manual.js) | El NDVI estacional escrito a mano, una variable por estación y por año | Con `Dia_2/scripts/ndvi_estacional.js`: el antes y el después de reescribirlo con funciones |
 | [`ndvi_zonas_mde.js`](ndvi_zonas_mde.js) | `.where()` en cadena para reclasificar, y **el reductor agrupado** (`mean().group(1)`) | Día 2, estadísticas zonales. El reductor agrupado es de lo más útil y de lo peor documentado de la API |
 | [`barcos_sentinel1.js`](barcos_sentinel1.js) | Radar: el máximo de VH como mapa de tráfico marítimo, 2019 contra 2020 | Día 2, como ejemplo de que el radar resuelve cosas que el óptico no |
+| [`alphaearth_parecido.js`](alphaearth_parecido.js) | **AlphaEarth Foundations**: los *embeddings* de 64 bandas y el mapa de «encuéntrame sitios como este», con una multiplicación y sin entrenar nada | Día 4, como alternativa a la clasificación supervisada. También sirve para medir cuánto ha cambiado un sitio entre dos años |
 | [`sst_canarias.js`](sst_canarias.js) | Temperatura del mar en Canarias: el afloramiento medido, y la anomalía de 44 años con la ola de calor marina de 2023 | Día 2, series temporales. Y la disyuntiva entre resolución y longitud de la serie, que condiciona cualquier trabajo con satélite |
 
 ## Qué NO está aquí, y por qué

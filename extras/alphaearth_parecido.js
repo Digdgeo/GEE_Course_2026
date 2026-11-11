@@ -1,10 +1,10 @@
 /**
- * Día 4 · AlphaEarth Foundations: buscar por parecido, sin entrenar nada
+ * Extra · AlphaEarth Foundations: buscar por parecido, sin entrenar nada
  * Curso «Análisis geoespacial avanzado con Google Earth Engine» — CSIC / EBD, 2026
  *
- * Sustituye al bloque de clasificación supervisada. La idea es la misma
- * —«encuéntrame sitios como este»— pero sin muestras de entrenamiento, sin
- * clasificador y sin validación: solo una multiplicación.
+ * Fuera de programa. Es una alternativa al bloque de clasificación
+ * supervisada: la idea es la misma —«encuéntrame sitios como este»— pero sin
+ * muestras de entrenamiento, sin clasificador y sin validación.
  *
  *   §1  Qué es un *embedding* y por qué 64 números bastan.
  *   §2  El mapa de parecido: producto escalar, una línea.
@@ -14,7 +14,7 @@
  *
  * CIFRAS DE CONTROL (medidas contra Earth Engine el 11-nov-2026). Si al
  * ejecutarlo te salen muy distintas, algo se ha roto:
- *   - la norma del vector es 1 (mediana 1,0015)
+ *   - la longitud de los vectores es 1 (mediana 1,0015)
  *   - parecido a la marisma inundada: mediana +0,619 en el recuadro
  *   - parecido al pinar:              mediana +0,588
  *   - parecido al arrozal:            mediana +0,420
@@ -62,28 +62,56 @@ Map.addLayer(emb, {bands: ['A01', 'A16', 'A09'], min: -0.3, max: 0.3},
              'Tres de las 64 bandas, en RGB', false);
 
 // =========================================================================
-// 1. LA PROPIEDAD QUE LO HACE FÁCIL: EL VECTOR ES UNITARIO
+// 1. POR QUÉ ESTO FUNCIONA (la parte que parece magia y no lo es)
 // =========================================================================
 
 /*
- * Los 64 números vienen normalizados: la longitud del vector es 1. Compruébalo,
- * no te fíes —es la propiedad de la que depende todo lo demás.
+ * Olvídate por un momento de los 64 números y quédate con DOS. Un píxel sería
+ * entonces un par, como (0,6 · 0,8), y eso se dibuja como una flecha desde el
+ * origen. Dos píxeles parecidos apuntan hacia el mismo sitio; dos píxeles
+ * distintos apuntan hacia lados distintos.
+ *
+ * Aquí está la clave: **lo que importa es la dirección de la flecha, no su
+ * longitud**. Y AlphaEarth te lo da ya resuelto, porque todas sus flechas
+ * miden exactamente 1. Es como si todos los píxeles estuvieran obligados a
+ * acabar sobre el borde de un círculo: lo único en lo que se pueden diferenciar
+ * es en POR DÓNDE del círculo caen.
+ *
+ * Y ahora, lo único que hay que creerse: si dos flechas miden 1,
+ * **multiplicar sus números uno a uno y sumarlos** te dice el ángulo que
+ * forman, en esta escala:
+ *
+ *      resultado 1   →  misma dirección      → el mismo tipo de sitio
+ *      resultado 0   →  perpendiculares      → no tienen nada que ver
+ *      resultado -1  →  direcciones opuestas → lo más distinto posible
+ *
+ * A ese «multiplica uno a uno y suma» se le llama producto escalar, y el
+ * número que sale es el coseno del ángulo. Pero el nombre da igual: lo que
+ * importa es que es **una multiplicación y una suma**, y que el resultado ya
+ * viene en una escala cómoda de 1 a -1.
+ *
+ * Compruébalo con dos flechas de juguete, que esto se entiende mejor viéndolo
+ * que leyéndolo:
  */
-var norma = emb.pow(2).reduce(ee.Reducer.sum()).sqrt();
-print('Norma del vector (debería dar ~1):',
-      norma.reduceRegion({reducer: ee.Reducer.percentile([1, 50, 99]),
-                          geometry: zona, scale: 100, maxPixels: 1e9}));
+var mismaDireccion   = ee.Array([0.6,  0.8]).multiply(ee.Array([0.6,  0.8])).reduce(ee.Reducer.sum(), [0]);
+var perpendiculares  = ee.Array([0.6,  0.8]).multiply(ee.Array([0.8, -0.6])).reduce(ee.Reducer.sum(), [0]);
+var opuestas         = ee.Array([0.6,  0.8]).multiply(ee.Array([-0.6, -0.8])).reduce(ee.Reducer.sum(), [0]);
+print('Dos flechas iguales       →', mismaDireccion);   // 1
+print('Dos flechas perpendiculares →', perpendiculares); // 0
+print('Dos flechas opuestas      →', opuestas);          // -1
 
 /*
- * ¿Y por qué importa? Porque si dos vectores tienen longitud 1, su producto
- * escalar ES el coseno del ángulo que forman:
+ * Con 64 números en vez de 2 no cambia nada: no te lo puedes imaginar, pero la
+ * cuenta es idéntica. Multiplicas los 64 por los 64 y sumas.
  *
- *      a · b = |a| |b| cos(θ) = cos(θ)        (con |a| = |b| = 1)
- *
- * O sea que multiplicar los 64 números de un píxel por los 64 de otro y sumar
- * da un número entre -1 y +1 que mide directamente **cuánto se parecen**:
- * +1 idénticos, 0 sin relación.
+ * Lo único que hay que verificar es que las flechas de verdad miden 1, porque
+ * de eso depende todo. La longitud de una flecha es la raíz de la suma de sus
+ * números al cuadrado — Pitágoras, con 64 lados en vez de 2:
  */
+var longitud = emb.pow(2).reduce(ee.Reducer.sum()).sqrt();
+print('Longitud de las flechas (tiene que dar ~1):',
+      longitud.reduceRegion({reducer: ee.Reducer.percentile([1, 50, 99]),
+                             geometry: zona, scale: 100, maxPixels: 1e9}));
 
 // =========================================================================
 // 2. EL MAPA DE PARECIDO
@@ -95,9 +123,9 @@ print('Norma del vector (debería dar ~1):',
  */
 function parecidoA(punto) {
   var v = emb.reduceRegion({reducer: ee.Reducer.first(), geometry: punto, scale: 10});
-  var vector = ee.Image.constant(v.toArray().toList());       // los 64 números
-  return emb.multiply(vector)                                 // píxel a píxel
-            .reduce(ee.Reducer.sum())                         // la suma: el coseno
+  var vector = ee.Image.constant(v.toArray().toList());  // la flecha del punto: 64 números
+  return emb.multiply(vector)                            // multiplica uno a uno...
+            .reduce(ee.Reducer.sum())                    // ...y suma: ahí está el parecido
             .rename('parecido');
 }
 
