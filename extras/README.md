@@ -20,6 +20,7 @@ Si lo que te sale es muy distinto, algo ha cambiado y merece la pena mirar qué.
 | [`barcos_sentinel1.js`](barcos_sentinel1.js) | Radar: el máximo de VH como mapa de tráfico marítimo, 2019 contra 2020 | Día 2, como ejemplo de que el radar resuelve cosas que el óptico no |
 | [`alphaearth_parecido.js`](alphaearth_parecido.js) | **AlphaEarth Foundations**: los *embeddings* de 64 bandas y el mapa de «encuéntrame sitios como este», con una multiplicación y sin entrenar nada | Día 4, como alternativa a la clasificación supervisada. También sirve para medir cuánto ha cambiado un sitio entre dos años |
 | [`sst_canarias.js`](sst_canarias.js) | Temperatura del mar en Canarias: el afloramiento medido, y la anomalía de 44 años con la ola de calor marina de 2023 | Día 2, series temporales. Y la disyuntiva entre resolución y longitud de la serie, que condiciona cualquier trabajo con satélite |
+| [`construcciones_y_luces.js`](construcciones_y_luces.js) | **Limpiar un producto con otro**: las dunas de Matalascañas que el GHSL antiguo daba por construidas, y el cruce con las luces nocturnas para quitarlas. De paso, por qué un dato continuo (m² por celda) no es una máscara, y qué se lleva por delante un filtro | Día 2, máscaras y reductores. Y como ejemplo de que antes de corregir un dato hay que mirar si ya lo han corregido río arriba |
 
 ## Qué NO está aquí, y por qué
 
@@ -30,7 +31,17 @@ está ahora dentro del script del día 2, junto al código al que se refiere.
 
 ## De dónde sale cada uno
 
-Los tres vienen de scripts usados en las ediciones de 2024 y 2025 del curso. El del NDVI
+Vienen de scripts usados en las ediciones de 2024 y 2025 del curso, salvo el de AlphaEarth
+—escrito en 2026, a raíz de una pregunta de clase— y el de **construcciones y luces**, que es
+un script propio de Diego, reescrito el 12 de noviembre de 2026. Lo que buscaba era
+quitar los falsos positivos del GHSL en la costa de Doñana —dunas y playa dadas por
+construidas— cruzándolo con las luces nocturnas, y así está planteado ahora, con las cifras
+medidas. Se ha pasado al GHSL **P2023A**, porque el P2016 que usaba está deprecado y además
+es el que comete el error; las épocas de construcción, que solo tiene el antiguo, quedan en
+el §6 como bloque comentado. Del original se corrigen y se explican tres cosas más, porque
+cada una enseña algo: calculaba la suma de las luces y pintaba la mediana con la etiqueta
+«SumLights», usaba el `mask()` deprecado y llevaba dos `Map.setCenter()` de los que solo
+manda el último. El del NDVI
 estacional tiene una versión con funciones en `Dia_2/scripts/`, y aquí se conserva **la
 versión larga** a propósito: la que se lee de arriba abajo sin funciones de por medio. El
 de las zonas con reductor agrupado no tiene equivalente en el repositorio, y el de los
