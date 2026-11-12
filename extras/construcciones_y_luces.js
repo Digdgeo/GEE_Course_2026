@@ -176,7 +176,7 @@ function hectareas(mascara, geom, escala) {
 }
 
 print('FRANJA DE PLAYA · P2016 dice (ha):', hectareas(edificado2016, franjaPlaya));        // 88,2
-print('FRANJA DE PLAYA · P2016 y con luz:', hectareas(edificado2016.And(hayLuz), franjaPlaya)); // 0
+print('FRANJA DE PLAYA · P2016 y con luz:', hectareas(edificado2016.and(hayLuz), franjaPlaya)); // 0
 print('FRANJA DE PLAYA · P2023A dice (ha):', hectareas(superficie.gt(0), franjaPlaya));    // 1,0
 print('FRANJA DE PLAYA · P2023A > umbral:', hectareas(hayEdificado, franjaPlaya));         // 0,0
 
@@ -201,12 +201,12 @@ var edificadoLimpio = hayEdificado.updateMask(hayLuz);
 var edificadoLimpioVis = edificadoLimpio.selfMask();
 
 // Lo que el filtro descarta, que es lo que hay que mirar antes de fiarse:
-var sospechoso = hayEdificado.And(hayLuz.Not()).selfMask();
+var sospechoso = hayEdificado.and(hayLuz.not()).selfMask();
 
 print('COSTA · edificado > umbral (ha):', hectareas(hayEdificado, costa));                 // 439,4
-print('COSTA · de ellas, sin luz (ha):', hectareas(hayEdificado.And(hayLuz.Not()), costa));// 10,2
+print('COSTA · de ellas, sin luz (ha):', hectareas(hayEdificado.and(hayLuz.not()), costa));// 10,2
 print('SEVILLA · edificado > umbral (ha):', hectareas(hayEdificado, sevilla));             // 26.726,5
-print('SEVILLA · de ellas, sin luz (ha):', hectareas(hayEdificado.And(hayLuz.Not()), sevilla)); // 869,2
+print('SEVILLA · de ellas, sin luz (ha):', hectareas(hayEdificado.and(hayLuz.not()), sevilla)); // 869,2
 
 /*
  * LO QUE DICEN ESAS CIFRAS:
