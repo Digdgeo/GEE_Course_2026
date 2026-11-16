@@ -73,11 +73,14 @@ Script: [`01_una_imagen_vs_una_coleccion.js`](scripts/01_una_imagen_vs_una_colec
 | 4 | [`mndwi_decades.js`](scripts/mndwi_decades.js) | MNDWI por décadas con cuatro Landsat combinados: renombrar bandas, escalar antes del índice y por qué `reproject()` no va dentro de un `map()` |
 | 5 | [`series_rejilla_temporal.js`](scripts/series_rejilla_temporal.js) | Rejilla temporal mensual con los huecos declarados, tendencia en unidades/año y estacionalidad armónica |
 | 6 | [`07_srtm_munis.js`](scripts/07_srtm_munis.js) | Estadísticas zonales: `reduceRegion` contra `reduceRegions`, por municipio y por selección |
-| 7 | [`GEE_CSIC_2025_1.ipynb`](scripts/GEE_CSIC_2025_1.ipynb) | Lo mismo en Python: introducción a geemap |
-| 8 | [`zonales_reduceregions.ipynb`](scripts/zonales_reduceregions.ipynb) | `reduceRegions` en Python: reductores combinados y agrupados, salida a pandas y las palancas de memoria y tiempo |
 
 Y en [`extras/`](../extras/) está la versión **a mano** del nº 2, escrita año por año sin
 funciones: sirve para ver de dónde sale el refactorizado.
+
+> **Los dos cuadernos de Python se han movido al [día 5](../Dia_5/)**, que es donde se dan:
+> `GEE_CSIC_2025_1.ipynb` (introducción a geemap) y `zonales_reduceregions.ipynb`
+> (`reduceRegions` en Python). El reparto quedó en un lenguaje por día: aquí JavaScript,
+> Python el último día.
 
 ## ✅ Ejercicio del día
 

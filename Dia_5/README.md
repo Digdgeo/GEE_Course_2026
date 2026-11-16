@@ -50,8 +50,19 @@ comenta qué los hace buenos y se cierra el curso.
 
 | Fichero | Qué es |
 |---|---|
+| [`GEE_CSIC_2025_1.ipynb`](scripts/GEE_CSIC_2025_1.ipynb) | **Introducción a geemap**: el mapa interactivo, vectores y ROIs dibujados, SRTM, Landsat, índices y máscaras, colecciones y compuestos, y el bloque de exportaciones |
+| [`zonales_reduceregions.ipynb`](scripts/zonales_reduceregions.ipynb) | `reduceRegion` contra `reduceRegions`, reductores combinados y agrupados, la caída a pandas con `ee_to_df`, figura y CSV, y las palancas de memoria y tiempo |
 | *(por escribir)* `GUIA_PR.md` | El flujo completo en capturas, para seguir sin perderse |
 | *(por escribir)* `issues_sugeridos.md` | Lista de tareas preparadas en Ndvi2Gif y en el repo del curso |
+
+Los dos cuadernos venían del día 2 y se quedaron sin dar: el reparto final fue **un lenguaje
+por día**, así que la parte de Python es hoy. En la celda de inicialización hay que poner
+**tu** proyecto de Earth Engine, no el que viene escrito.
+
+Y para la parte de **ndvi2gif**, los tres cuadernos del taller de las Jornadas de
+Ecoinformática, que se abren en Colab de un clic desde el
+[README del taller](https://github.com/Digdgeo/Ndvi2Gif/tree/master/workshops/ecoinformatica):
+ROIs y estadísticos (con el GIF y la exportación para QGIS), hidroperiodo y fenología.
 
 ## ✅ Ejercicio final
 
